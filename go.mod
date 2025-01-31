@@ -4,12 +4,12 @@ go 1.23.5
 
 require (
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/microsoft/go-mssqldb v1.8.0
 	github.com/sijms/go-ora/v2 v2.8.23
 	go.mongodb.org/mongo-driver v1.17.2
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -28,5 +28,4 @@ require (
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
