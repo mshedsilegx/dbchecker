@@ -22,6 +22,8 @@ import (
 	"gopkg.in/yaml.v3" // Use v3 for better YAML support
 )
 
+var version string
+
 type DatabaseConfig struct {
 	Type        string `yaml:"type"`
 	Host        string `yaml:"host"`
@@ -145,7 +147,14 @@ func connectAndCheck(config DatabaseConfig, dbID string) error {
 func main() {
 	configFile := flag.String("config", "config.yaml", "Path to the configuration file")
 	dbID := flag.String("db", "", "Identifier of the database to check")
+	versionFlag := flag.Bool("version", false, "Display version information")
 	flag.Parse()
+
+	// Version
+	if *versionFlag {
+		fmt.Printf("DB Connection Diags - Version: %s\n", version)
+		os.Exit(0)
+	}
 
 	if os.Getenv("DB_SECRET_KEY") == "" {
 		fmt.Println("DB_SECRET_KEY environment variable is not set.")
