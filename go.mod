@@ -7,7 +7,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/microsoft/go-mssqldb v1.8.0
-	github.com/sijms/go-ora/v2 v2.8.23
+	github.com/sijms/go-ora/v2 v2.8.24
 	go.mongodb.org/mongo-driver v1.17.2
 	gopkg.in/yaml.v3 v3.0.1
 )
