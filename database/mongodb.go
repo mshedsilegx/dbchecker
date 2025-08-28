@@ -28,7 +28,7 @@ func (m *MongoDB) Connect(ctx context.Context, cfg config.DatabaseConfig, decryp
 		clientOptions.SetAuth(creds)
 	}
 
-	tlsConfig, err := buildTLSConfig(cfg.TLSMode, cfg.Host)
+	tlsConfig, err := buildTLSConfig(cfg.TLSMode, cfg.Host, cfg.RootCertPath, cfg.ClientCertPath, cfg.ClientKeyPath)
 	if err != nil {
 		return err
 	}

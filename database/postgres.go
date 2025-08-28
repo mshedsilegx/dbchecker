@@ -37,6 +37,17 @@ func (p *Postgres) Connect(ctx context.Context, cfg config.DatabaseConfig, decry
 		return fmt.Errorf("invalid tls_mode for postgres: %s", cfg.TLSMode)
 	}
 	query.Set("sslmode", sslMode)
+
+	if cfg.RootCertPath != "" {
+		query.Set("sslrootcert", cfg.RootCertPath)
+	}
+	if cfg.ClientCertPath != "" {
+		query.Set("sslcert", cfg.ClientCertPath)
+	}
+	if cfg.ClientKeyPath != "" {
+		query.Set("sslkey", cfg.ClientKeyPath)
+	}
+
 	dsn.RawQuery = query.Encode()
 
 	db, err := sql.Open("postgres", dsn.String())

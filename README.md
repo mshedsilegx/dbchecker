@@ -35,6 +35,10 @@ databases:
     password: "string"
     name: "string"
     tls_mode: "string"
+    wallet_path: "string"
+    root_cert_path: "string"
+    client_cert_path: "string"
+    client_key_path: "string"
     health_query: "string"
 ```
 
@@ -50,6 +54,10 @@ databases:
   - `require`: Use TLS, but do not verify the server's certificate. **Warning: This is vulnerable to Man-in-the-Middle (MITM) attacks.**
   - `verify-ca`: Use TLS and verify the server's certificate against the system's trusted Certificate Authorities (CAs). **(Recommended)**
   - `verify-full`: Use TLS, verify the server's certificate against the system's trusted CAs, and also verify that the server's hostname matches the certificate. **(Most Secure)**
+- `wallet_path`: (Optional, Oracle only) The path to the directory containing the Oracle Wallet, required for `verify-ca` and `verify-full` modes with Oracle.
+- `root_cert_path`: (Optional) Path to a custom root CA certificate file (PEM format). If provided, it will be used to verify the server's certificate instead of the system's default trust store.
+- `client_cert_path`: (Optional) Path to a client certificate file (PEM format) for mutual TLS (mTLS) authentication. Requires `client_key_path`.
+- `client_key_path`: (Optional) Path to a client private key file (PEM format) for mTLS. Requires `client_cert_path`.
 - `health_query`: (Optional) A simple SQL query to execute to verify the connection is healthy (e.g., `"SELECT 1"`). This is not used for MongoDB.
 
 ## Examples

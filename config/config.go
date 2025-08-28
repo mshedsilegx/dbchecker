@@ -15,8 +15,11 @@ type DatabaseConfig struct {
 	Password    string `yaml:"password"`
 	Name        string `yaml:"name"`
 	HealthQuery string `yaml:"health_query"`
-	TLSMode     string `yaml:"tls_mode,omitempty"`
-	WalletPath  string `yaml:"wallet_path,omitempty"`
+	TLSMode        string `yaml:"tls_mode,omitempty"`
+	WalletPath     string `yaml:"wallet_path,omitempty"`
+	RootCertPath   string `yaml:"root_cert_path,omitempty"`
+	ClientCertPath string `yaml:"client_cert_path,omitempty"`
+	ClientKeyPath  string `yaml:"client_key_path,omitempty"`
 }
 
 type Config struct {

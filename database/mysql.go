@@ -24,7 +24,7 @@ func (m *MySQL) Connect(ctx context.Context, cfg config.DatabaseConfig, decrypte
 		AllowNativePasswords: true,
 	}
 
-	tlsConfig, err := buildTLSConfig(cfg.TLSMode, cfg.Host)
+	tlsConfig, err := buildTLSConfig(cfg.TLSMode, cfg.Host, cfg.RootCertPath, cfg.ClientCertPath, cfg.ClientKeyPath)
 	if err != nil {
 		return err
 	}
