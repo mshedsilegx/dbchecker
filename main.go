@@ -55,12 +55,10 @@ func main() {
 		secretKeyBytes = []byte(secretKey)
 	}
 
-	// Example obfuscated key (replace with your actual obfuscated key)
-	obfuscatedKey, _ := base64.StdEncoding.DecodeString("your_obfuscated_key_here")
-	deobfuscatedKey := crypto.XORDecrypt(obfuscatedKey, secretKeyBytes)
-
+	// The user-provided secret key is used directly.
+	// The unnecessary XOR obfuscation layer has been removed.
 	if *encryptFlag != "" {
-		encryptedPassword, err := crypto.Encrypt([]byte(*encryptFlag), deobfuscatedKey)
+		encryptedPassword, err := crypto.Encrypt([]byte(*encryptFlag), secretKeyBytes)
 		if err != nil {
 			fmt.Printf("Error encrypting password: %v\n", err)
 			os.Exit(1)
@@ -81,7 +79,7 @@ func main() {
 			fmt.Printf("Database with ID '%s' not found in config\n", *dbID)
 			os.Exit(1)
 		}
-		if err := checkDatabase(dbConfig, *dbID, deobfuscatedKey); err != nil {
+		if err := checkDatabase(dbConfig, *dbID, secretKeyBytes); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -91,7 +89,7 @@ func main() {
 			wg.Add(1)
 			go func(id string, dbConfig config.DatabaseConfig) {
 				defer wg.Done()
-				if err := checkDatabase(dbConfig, id, deobfuscatedKey); err != nil {
+				if err := checkDatabase(dbConfig, id, secretKeyBytes); err != nil {
 					fmt.Println(err)
 				}
 			}(id, dbConfig)

@@ -111,21 +111,23 @@ export DB_SECRET_KEY="your-32-byte-secret-key"
 
 ## Security and Credential Encryption
 
-To avoid storing plaintext passwords in the configuration file, the application uses AES-GCM encryption to secure your credentials.
-Providing the Secret Key
+To avoid storing plaintext passwords in the configuration file, the application uses AES-GCM encryption. The security of your passwords depends entirely on the secrecy of your secret key.
 
 ### How it Works
 
-1.  **Secret Key**: The application uses a secret key for encryption and decryption. This key is provided at runtime via the `DB_SECRET_KEY` environment variable. **This key must be 32 bytes (256 bits) long.**
-2.  **Encryption**: You use the `-encrypt` flag to encrypt your database password. The application uses the `DB_SECRET_KEY` to perform the encryption and gives you a base64-encoded string.
-3.  **Configuration**: You paste this encrypted string into the `password` field in your `config.yaml`.
-4.  **Decryption**: When the application runs, it reads the encrypted password from the config, reads the `DB_SECRET_KEY` from the environment, and decrypts the password in memory just before connecting to the database.
+1.  **Generate a Secret Key**: You provide a secure, 32-byte (256-bit) secret key to the application.
+2.  **Encrypt Passwords**: You use the `-encrypt` flag along with your secret key to encrypt a plaintext password.
+3.  **Configure**: You store the resulting encrypted password in the `config.yaml` file.
+4.  **Decrypt at Runtime**: When the application runs, it uses the same secret key to decrypt the password in memory just before establishing a database connection.
 
-You can provide the secret key to the application in one of two ways.
-* the `DB_SECRET_KEY` environment variable, passed through a XOR de-obfuscation step with a key compiled into the application.
-  Key File (Recommended): You can store the key in a file and provide the path to it using the -key-file flag. This is the recommended approach for production environments.
+### Providing the Secret Key
 
-* The -key-file flag always takes precedence over the DB_SECRET_KEY environment variable if both are present.
+You can provide the secret key to the application in one of two ways:
+
+*   **Key File (Recommended)**: You can store the key in a file and provide the path to it using the `-key-file` flag. This is the recommended approach for production environments as it helps avoid exposing keys in shell history or process lists.
+*   **Environment Variable**: You can provide the key via the `DB_SECRET_KEY` environment variable.
+
+The `-key-file` flag always takes precedence over the `DB_SECRET_KEY` environment variable if both are present.
 
 
 ### How to Encrypt Your Credentials

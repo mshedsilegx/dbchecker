@@ -41,11 +41,3 @@ func Decrypt(data, key []byte) ([]byte, error) {
 	}
 	return plaintext, nil
 }
-
-func XORDecrypt(data []byte, key []byte) []byte {
-	decrypted := make([]byte, len(data))
-	for i := 0; i < len(data); i++ {
-		decrypted[i] = data[i] ^ key[i%len(key)]
-	}
-	return decrypted
-}
