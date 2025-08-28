@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 
 	"criticalsys.net/dbchecker/config"
 	"criticalsys.net/dbchecker/crypto"
@@ -18,6 +19,7 @@ func main() {
 	dbID := flag.String("db", "", "Identifier of the database to check")
 	versionFlag := flag.Bool("version", false, "Display version information")
 	encryptFlag := flag.String("encrypt", "", "Encrypt a password and exit")
+	keyFileFlag := flag.String("key-file", "", "Path to the secret key file (overrides DB_SECRET_KEY)")
 	flag.Parse()
 
 	if *versionFlag {
@@ -25,15 +27,36 @@ func main() {
 		os.Exit(0)
 	}
 
-	secretKey := os.Getenv("DB_SECRET_KEY")
-	if secretKey == "" {
-		fmt.Println("DB_SECRET_KEY environment variable is not set.")
-		os.Exit(1)
+	var secretKeyBytes []byte
+	if *keyFileFlag != "" {
+		// Use key file
+		fileInfo, err := os.Stat(*keyFileFlag)
+		if err != nil {
+			fmt.Printf("Error accessing key file: %v\n", err)
+			os.Exit(1)
+		}
+		if runtime.GOOS != "windows" && fileInfo.Mode().Perm() != 0400 {
+			fmt.Printf("Error: Key file permissions must be 400 (read-only for owner).")
+			os.Exit(1)
+		}
+		secretKeyBytes, err = os.ReadFile(*keyFileFlag)
+		if err != nil {
+			fmt.Printf("Error reading key file: %v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		// Fallback to environment variable
+		secretKey := os.Getenv("DB_SECRET_KEY")
+		if secretKey == "" {
+			fmt.Println("Error: No secret key provided. Use -key-file flag or set DB_SECRET_KEY environment variable.")
+			os.Exit(1)
+		}
+		secretKeyBytes = []byte(secretKey)
 	}
 
 	// Example obfuscated key (replace with your actual obfuscated key)
 	obfuscatedKey, _ := base64.StdEncoding.DecodeString("your_obfuscated_key_here")
-	deobfuscatedKey := crypto.XORDecrypt(obfuscatedKey, []byte(secretKey))
+	deobfuscatedKey := crypto.XORDecrypt(obfuscatedKey, secretKeyBytes)
 
 	if *encryptFlag != "" {
 		encryptedPassword, err := crypto.Encrypt([]byte(*encryptFlag), deobfuscatedKey)
