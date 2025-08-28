@@ -28,8 +28,12 @@ func (m *MongoDB) Connect(cfg config.DatabaseConfig, decryptedPassword string) e
 		clientOptions.SetAuth(creds)
 	}
 
-	if cfg.TLS {
-		clientOptions.SetTLSConfig(&tls.Config{InsecureSkipVerify: true}) // TODO: This is insecure, should be made configurable
+	tlsConfig, err := buildTLSConfig(cfg.TLSMode, cfg.Host)
+	if err != nil {
+		return err
+	}
+	if tlsConfig != nil {
+		clientOptions.SetTLSConfig(tlsConfig)
 	}
 
 	client, err := mongo.Connect(context.TODO(), clientOptions)

@@ -14,7 +14,7 @@ type DatabaseConfig struct {
 	Password    string `yaml:"password"`
 	Name        string `yaml:"name"`
 	HealthQuery string `yaml:"health_query"`
-	TLS         bool   `yaml:"tls"`
+	TLSMode     string `yaml:"tls_mode,omitempty"`
 }
 
 type Config struct {

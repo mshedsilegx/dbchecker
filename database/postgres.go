@@ -22,11 +22,20 @@ func (p *Postgres) Connect(cfg config.DatabaseConfig, decryptedPassword string) 
 	}
 
 	query := dsn.Query()
-	if cfg.TLS {
-		query.Set("sslmode", "require")
-	} else {
-		query.Set("sslmode", "disable")
+	sslMode := "disable" // Default to disable
+	switch cfg.TLSMode {
+	case "require":
+		sslMode = "require"
+	case "verify-ca":
+		sslMode = "verify-ca"
+	case "verify-full":
+		sslMode = "verify-full"
+	case "disable", "": // Treat empty as disable
+		sslMode = "disable"
+	default:
+		return fmt.Errorf("invalid tls_mode for postgres: %s", cfg.TLSMode)
 	}
+	query.Set("sslmode", sslMode)
 	dsn.RawQuery = query.Encode()
 
 	db, err := sql.Open("postgres", dsn.String())

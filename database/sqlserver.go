@@ -17,6 +17,21 @@ func (s *SQLServer) Connect(cfg config.DatabaseConfig, decryptedPassword string)
 	query := url.Values{}
 	query.Add("database", cfg.Name)
 
+	switch cfg.TLSMode {
+	case "disable", "":
+		query.Add("encrypt", "false")
+	case "require":
+		query.Add("encrypt", "true")
+		query.Add("trust server certificate", "true")
+	case "verify-ca", "verify-full":
+		// For both verify-ca and verify-full, we want the driver to validate the cert.
+		// The driver uses hostname verification by default when trust server certificate is false.
+		query.Add("encrypt", "true")
+		query.Add("trust server certificate", "false")
+	default:
+		return fmt.Errorf("invalid tls_mode for sqlserver: %s", cfg.TLSMode)
+	}
+
 	dsn := &url.URL{
 		Scheme:   "sqlserver",
 		User:     url.UserPassword(cfg.User, decryptedPassword),

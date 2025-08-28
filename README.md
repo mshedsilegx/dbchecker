@@ -34,7 +34,7 @@ databases:
     user: "string"
     password: "string"
     name: "string"
-    tls: bool
+    tls_mode: "string"
     health_query: "string"
 ```
 
@@ -45,7 +45,11 @@ databases:
 - `user`: The username for authentication.
 - `password`: The **encrypted** password for the user. See the security section for instructions on how to encrypt passwords.
 - `name`: The name of the database or schema to connect to. For SQLite, this is the path to the database file.
-- `tls`: A boolean (`true` or `false`) to enable or disable TLS/SSL for the connection.
+- `tls_mode`: (Optional) Specifies the TLS/SSL security mode. If omitted, defaults to `disable`.
+  - `disable`: Do not use TLS.
+  - `require`: Use TLS, but do not verify the server's certificate. **Warning: This is vulnerable to Man-in-the-Middle (MITM) attacks.**
+  - `verify-ca`: Use TLS and verify the server's certificate against the system's trusted Certificate Authorities (CAs). **(Recommended)**
+  - `verify-full`: Use TLS, verify the server's certificate against the system's trusted CAs, and also verify that the server's hostname matches the certificate. **(Most Secure)**
 - `health_query`: (Optional) A simple SQL query to execute to verify the connection is healthy (e.g., `"SELECT 1"`). This is not used for MongoDB.
 
 ## Examples
@@ -59,12 +63,12 @@ To check a PostgreSQL database, add an entry like this to your `config.yaml`:
 databases:
   my_postgres_db:
     type: "postgres"
-    host: "localhost"
+    host: "db.example.com"
     port: 5432
     user: "pguser"
     password: "ENCRYPTED_PASSWORD_HERE" # Replace with your encrypted password
     name: "mydatabase"
-    tls: false
+    tls_mode: "verify-full" # Use the most secure TLS mode
     health_query: "SELECT 1"
 ```
 Run the check for this specific database:
@@ -86,12 +90,12 @@ To check a MongoDB database, add an entry like this:
 databases:
   my_mongo_db:
     type: "mongodb"
-    host: "localhost"
+    host: "db.example.com"
     port: 27017
     user: "mongouser"
     password: "ENCRYPTED_PASSWORD_HERE" # Replace with your encrypted password
     name: "admin"
-    tls: false
+    tls_mode: "verify-full"
 ```
 
 Run the check for this specific database:
