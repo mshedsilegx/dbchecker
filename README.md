@@ -66,9 +66,9 @@ databases:
     name: "mydatabase"
     tls: false
     health_query: "SELECT 1"
-
+```
 Run the check for this specific database:
-* using a key file (recommended):
+* Using a key file (recommended):
 ```bash
 ./dbchecker -key-file /path/to/your/secret.key -db my_postgres_db
 ```
@@ -95,7 +95,7 @@ databases:
 ```
 
 Run the check for this specific database:
-* using a key file (recommended):
+* Using a key file (recommended):
 ```bash
 ./dbchecker -key-file /path/to/your/secret.key -db my_mongo_db
 ```
@@ -129,49 +129,49 @@ You can provide the secret key to the application in one of two ways.
 **Step 1: Generate a Secure Secret Key**
 
 First, you need a secure, 32-byte secret key. You can generate one using `openssl`.
- * To create a key file (recommended):
+* To create a key file (recommended):
 
-    On Linux or macOS:
+On Linux or macOS:
 ```bash
-    openssl rand 32 > /path/to/your/secret.key
+openssl rand 32 > /path/to/your/secret.key
 ```
-    # Set strict, read-only permissions for the key file
+Set strict, read-only permissions for the key file
 ```bash
-    chmod 400 /path/to/your/secret.key
+chmod 400 /path/to/your/secret.key
 ```
-    The application will check for these exact permissions on non-Windows systems and will not run if the file is accessible by other users.
+The application will check for these exact permissions on non-Windows systems and will not run if the file is accessible by other users.
 
-    On Windows: You should use the file system's ACL (Access Control List) features to restrict access to the current user. You can do this with the icacls command:
+On Windows: You should use the file system's ACL (Access Control List) features to restrict access to the current user. You can do this with the icacls command:
 
-    # First, disable inheritance to remove other users
+First, disable inheritance to remove other users
 ```bash
-    icacls "C:\path\to\your\secret.key" /inheritance:r
+icacls "C:\path\to\your\secret.key" /inheritance:r
 ```
-    # Then, grant access only to your user
+Then, grant access only to your user
 ```bash
-    icacls "C:\path\to\your\secret.key" /grant:r "$($env:USERNAME):(R)"
+icacls "C:\path\to\your\secret.key" /grant:r "$($env:USERNAME):(R)"
 ```
 
  * To generate a key for the environment variable:
 ```bash
     openssl rand -base64 32
 ```
-** Step 2: Encrypt Your Password
+**Step 2: Encrypt Your Password**
 
 Now, use the application's -encrypt flag to encrypt your database password.
 
   * Using the key file:
 ```bash
-    ./dbchecker -key-file /path/to/your/secret.key -encrypt 'my-super-secret-password'
+./dbchecker -key-file /path/to/your/secret.key -encrypt 'my-super-secret-password'
 ```
   * Using the environment variable:
 ```bash
-    export DB_SECRET_KEY="your-generated-key"
-    ./dbchecker -encrypt 'my-super-secret-password'
+export DB_SECRET_KEY="your-generated-key"
+./dbchecker -encrypt 'my-super-secret-password'
 ```
 The application will output a long, base64-encoded string. This is your encrypted password.
 
-** Step 3: Update Your Configuration
+**Step 3: Update Your Configuration**
 
 Copy the encrypted password from Step 2 and paste it into the password field in your config.yaml file.
 
