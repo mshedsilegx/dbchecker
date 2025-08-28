@@ -8,7 +8,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type MySQL struct{}
+type MySQL struct {
+	SQLBase
+}
 
 func (m *MySQL) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
 	tlsConfig := ""
@@ -20,18 +22,6 @@ func (m *MySQL) Connect(cfg config.DatabaseConfig, decryptedPassword string) err
 	if err != nil {
 		return err
 	}
-	defer db.Close()
-
-	if err := db.Ping(); err != nil {
-		return err
-	}
-
-	if cfg.HealthQuery != "" {
-		_, err := db.Exec(cfg.HealthQuery)
-		if err != nil {
-			return fmt.Errorf("health check query failed: %w", err)
-		}
-	}
-
+	m.db = db
 	return nil
 }
