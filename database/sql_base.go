@@ -6,7 +6,7 @@ import (
 )
 
 // SQLBase is a helper struct that can be embedded by SQL-based database
-// providers to share common functionality like Ping, HealthCheck, and Close.
+// providers to share common functionality.
 type SQLBase struct {
 	db *sql.DB
 }

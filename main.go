@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"sync"
 
 	"criticalsys.net/dbchecker/config"
 	"criticalsys.net/dbchecker/crypto"
@@ -86,17 +85,11 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
-		var wg sync.WaitGroup
 		for id, dbConfig := range cfg.Databases {
-			wg.Add(1)
-			go func(id string, dbConfig config.DatabaseConfig) {
-				defer wg.Done()
-				if err := checkDatabase(dbConfig, id, deobfuscatedKey); err != nil {
-					fmt.Println(err)
-				}
-			}(id, dbConfig)
+			if err := checkDatabase(dbConfig, id, deobfuscatedKey); err != nil {
+				fmt.Println(err)
+			}
 		}
-		wg.Wait()
 	}
 }
 
@@ -106,9 +99,22 @@ func checkDatabase(dbConfig config.DatabaseConfig, dbID string, secretKey []byte
 		return fmt.Errorf("password decryption failed for %s: %w", dbID, err)
 	}
 
-	db, err := database.New(dbConfig.Type)
-	if err != nil {
-		return err
+	var db database.DB
+	switch dbConfig.Type {
+	case "mysql":
+		db = &database.MySQL{}
+	case "postgres":
+		db = &database.Postgres{}
+	case "oracle":
+		db = &database.Oracle{}
+	case "sqlserver":
+		db = &database.SQLServer{}
+	case "sqlite":
+		db = &database.SQLite{}
+	case "mongodb":
+		db = &database.MongoDB{}
+	default:
+		return fmt.Errorf("unsupported database type: %s", dbConfig.Type)
 	}
 
 	if err := db.Connect(dbConfig, string(decryptedPassword)); err != nil {
