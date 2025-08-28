@@ -9,7 +9,7 @@ import (
 )
 
 type MySQL struct {
-	db *sql.DB
+	SQLBase
 }
 
 func (m *MySQL) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
@@ -23,18 +23,6 @@ func (m *MySQL) Connect(cfg config.DatabaseConfig, decryptedPassword string) err
 		return err
 	}
 	m.db = db
-	return nil
-}
-
-func (m *MySQL) Ping() error {
-	return m.db.Ping()
-}
-
-func (m *MySQL) HealthCheck(query string) error {
-	_, err := m.db.Exec(query)
-	if err != nil {
-		return fmt.Errorf("health check query failed: %w", err)
-	}
 	return nil
 }
 

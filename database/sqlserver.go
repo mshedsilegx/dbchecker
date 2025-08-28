@@ -22,18 +22,6 @@ func (s *SQLServer) Connect(cfg config.DatabaseConfig, decryptedPassword string)
 	return nil
 }
 
-func (s *SQLServer) Ping() error {
-	return s.db.Ping()
-}
-
-func (s *SQLServer) HealthCheck(query string) error {
-	_, err := s.db.Exec(query)
-	if err != nil {
-		return fmt.Errorf("health check query failed: %w", err)
-	}
-	return nil
-}
-
 func (s *SQLServer) Close() error {
 	return s.db.Close()
 }

@@ -9,7 +9,7 @@ import (
 )
 
 type Oracle struct {
-	db *sql.DB
+	SQLBase
 }
 
 func (o *Oracle) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
@@ -19,18 +19,6 @@ func (o *Oracle) Connect(cfg config.DatabaseConfig, decryptedPassword string) er
 		return err
 	}
 	o.db = db
-	return nil
-}
-
-func (o *Oracle) Ping() error {
-	return o.db.Ping()
-}
-
-func (o *Oracle) HealthCheck(query string) error {
-	_, err := o.db.Exec(query)
-	if err != nil {
-		return fmt.Errorf("health check query failed: %w", err)
-	}
 	return nil
 }
 
