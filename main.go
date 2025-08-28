@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"flag"
 	"fmt"
@@ -73,13 +74,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	ctx := context.Background()
+
 	if *dbID != "" {
 		dbConfig, ok := cfg.Databases[*dbID]
 		if !ok {
 			fmt.Printf("Database with ID '%s' not found in config\n", *dbID)
 			os.Exit(1)
 		}
-		if err := checkDatabase(dbConfig, *dbID, secretKeyBytes); err != nil {
+		if err := checkDatabase(ctx, dbConfig, *dbID, secretKeyBytes); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -89,7 +92,7 @@ func main() {
 			wg.Add(1)
 			go func(id string, dbConfig config.DatabaseConfig) {
 				defer wg.Done()
-				if err := checkDatabase(dbConfig, id, secretKeyBytes); err != nil {
+				if err := checkDatabase(ctx, dbConfig, id, secretKeyBytes); err != nil {
 					fmt.Println(err)
 				}
 			}(id, dbConfig)
@@ -98,7 +101,7 @@ func main() {
 	}
 }
 
-func checkDatabase(dbConfig config.DatabaseConfig, dbID string, secretKey []byte) error {
+func checkDatabase(ctx context.Context, dbConfig config.DatabaseConfig, dbID string, secretKey []byte) error {
 	decryptedPassword, err := crypto.Decrypt([]byte(dbConfig.Password), secretKey)
 	if err != nil {
 		return fmt.Errorf("password decryption failed for %s: %w", dbID, err)
@@ -109,17 +112,17 @@ func checkDatabase(dbConfig config.DatabaseConfig, dbID string, secretKey []byte
 		return err
 	}
 
-	if err := db.Connect(dbConfig, string(decryptedPassword)); err != nil {
+	if err := db.Connect(ctx, dbConfig, string(decryptedPassword)); err != nil {
 		return fmt.Errorf("connection failed for %s: %w", dbID, err)
 	}
 	defer db.Close()
 
-	if err := db.Ping(); err != nil {
+	if err := db.Ping(ctx); err != nil {
 		return fmt.Errorf("ping failed for %s: %w", dbID, err)
 	}
 
 	if dbConfig.HealthQuery != "" {
-		if err := db.HealthCheck(dbConfig.HealthQuery); err != nil {
+		if err := db.HealthCheck(ctx, dbConfig.HealthQuery); err != nil {
 			return fmt.Errorf("health check failed for %s: %w", dbID, err)
 		}
 	}

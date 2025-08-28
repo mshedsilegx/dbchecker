@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/url"
@@ -13,7 +14,7 @@ type SQLServer struct {
 	SQLBase
 }
 
-func (s *SQLServer) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
+func (s *SQLServer) Connect(ctx context.Context, cfg config.DatabaseConfig, decryptedPassword string) error {
 	query := url.Values{}
 	query.Add("database", cfg.Name)
 

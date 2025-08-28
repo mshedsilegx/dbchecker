@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -12,7 +13,7 @@ type MySQL struct {
 	SQLBase
 }
 
-func (m *MySQL) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
+func (m *MySQL) Connect(ctx context.Context, cfg config.DatabaseConfig, decryptedPassword string) error {
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	mysqlConfig := mysql.Config{
 		User:                 cfg.User,

@@ -1,14 +1,15 @@
 package database
 
 import (
+	"context"
 	"criticalsys.net/dbchecker/config"
 	"fmt"
 )
 
 type DB interface {
-	Connect(cfg config.DatabaseConfig, decryptedPassword string) error
-	Ping() error
-	HealthCheck(query string) error
+	Connect(ctx context.Context, cfg config.DatabaseConfig, decryptedPassword string) error
+	Ping(ctx context.Context) error
+	HealthCheck(ctx context.Context, query string) error
 	Close() error
 }
 

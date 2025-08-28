@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -12,7 +13,7 @@ type Oracle struct {
 	SQLBase
 }
 
-func (o *Oracle) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
+func (o *Oracle) Connect(ctx context.Context, cfg config.DatabaseConfig, decryptedPassword string) error {
 	urlOptions := make(map[string]string)
 
 	switch cfg.TLSMode {
@@ -22,9 +23,11 @@ func (o *Oracle) Connect(cfg config.DatabaseConfig, decryptedPassword string) er
 		urlOptions["ssl"] = "true"
 		urlOptions["ssl verify"] = "false"
 	case "verify-ca", "verify-full":
-		// The go-ora driver requires a wallet for full certificate verification.
-		// Since wallet_path is not a configuration option, we cannot support this mode.
-		return fmt.Errorf("tls_mode '%s' is not supported for Oracle without a configured wallet path", cfg.TLSMode)
+		if cfg.WalletPath == "" {
+			return fmt.Errorf("tls_mode %q for oracle requires a wallet_path", cfg.TLSMode)
+		}
+		urlOptions["ssl"] = "true"
+		urlOptions["wallet"] = cfg.WalletPath
 	default:
 		return fmt.Errorf("invalid tls_mode for oracle: %s", cfg.TLSMode)
 	}

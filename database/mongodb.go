@@ -16,7 +16,7 @@ type MongoDB struct {
 	database string
 }
 
-func (m *MongoDB) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
+func (m *MongoDB) Connect(ctx context.Context, cfg config.DatabaseConfig, decryptedPassword string) error {
 	clientOptions := options.Client()
 	clientOptions.SetHosts([]string{fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)})
 
@@ -36,7 +36,7 @@ func (m *MongoDB) Connect(cfg config.DatabaseConfig, decryptedPassword string) e
 		clientOptions.SetTLSConfig(tlsConfig)
 	}
 
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		return fmt.Errorf("mongodb connection failed: %w", err)
 	}
@@ -45,14 +45,14 @@ func (m *MongoDB) Connect(cfg config.DatabaseConfig, decryptedPassword string) e
 	return nil
 }
 
-func (m *MongoDB) Ping() error {
-	return m.client.Ping(context.TODO(), nil)
+func (m *MongoDB) Ping(ctx context.Context) error {
+	return m.client.Ping(ctx, nil)
 }
 
 // HealthCheck for MongoDB lists collection names as a basic check. The query parameter is ignored.
-func (m *MongoDB) HealthCheck(query string) error {
+func (m *MongoDB) HealthCheck(ctx context.Context, query string) error {
 	db := m.client.Database(m.database)
-	_, err := db.ListCollectionNames(context.TODO(), primitive.M{})
+	_, err := db.ListCollectionNames(ctx, primitive.M{})
 	if err != nil {
 		return fmt.Errorf("mongodb list collections failed: %w", err)
 	}
@@ -60,5 +60,7 @@ func (m *MongoDB) HealthCheck(query string) error {
 }
 
 func (m *MongoDB) Close() error {
-	return m.client.Disconnect(context.TODO())
+	// Close does not need a context, but we might want one for graceful shutdown in the future.
+	// For now, we'll use a background context to satisfy the disconnect method.
+	return m.client.Disconnect(context.Background())
 }

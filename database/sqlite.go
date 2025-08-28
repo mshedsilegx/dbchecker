@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 
 	"criticalsys.net/dbchecker/config"
@@ -11,7 +12,7 @@ type SQLite struct {
 	SQLBase
 }
 
-func (s *SQLite) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
+func (s *SQLite) Connect(ctx context.Context, cfg config.DatabaseConfig, decryptedPassword string) error {
 	db, err := sql.Open("sqlite3", cfg.Name)
 	if err != nil {
 		return err

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/url"
@@ -13,7 +14,7 @@ type Postgres struct {
 	SQLBase
 }
 
-func (p *Postgres) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
+func (p *Postgres) Connect(ctx context.Context, cfg config.DatabaseConfig, decryptedPassword string) error {
 	dsn := url.URL{
 		Scheme: "postgres",
 		User:   url.UserPassword(cfg.User, decryptedPassword),
