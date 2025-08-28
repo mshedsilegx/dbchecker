@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"criticalsys.net/dbchecker/config"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 )
 
 type MySQL struct {
@@ -13,11 +13,19 @@ type MySQL struct {
 }
 
 func (m *MySQL) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
-	tlsConfig := ""
-	if cfg.TLS {
-		tlsConfig = "?tls=true"
+	mysqlConfig := mysql.Config{
+		User:                 cfg.User,
+		Passwd:               decryptedPassword,
+		Net:                  "tcp",
+		Addr:                 fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		DBName:               cfg.Name,
+		AllowNativePasswords: true,
 	}
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s%s", cfg.User, decryptedPassword, cfg.Host, cfg.Port, cfg.Name, tlsConfig)
+	if cfg.TLS {
+		mysqlConfig.TLSConfig = "true"
+	}
+
+	connectionString := mysqlConfig.FormatDSN()
 	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		return err

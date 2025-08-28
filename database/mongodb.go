@@ -17,10 +17,21 @@ type MongoDB struct {
 }
 
 func (m *MongoDB) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
-	clientOptions := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s:%d/%s", cfg.User, decryptedPassword, cfg.Host, cfg.Port, cfg.Name))
-	if cfg.TLS {
-		clientOptions = clientOptions.SetTLSConfig(&tls.Config{InsecureSkipVerify: true}) // Adjust TLS config as needed
+	clientOptions := options.Client()
+	clientOptions.SetHosts([]string{fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)})
+
+	if cfg.User != "" {
+		creds := options.Credential{
+			Username: cfg.User,
+			Password: decryptedPassword,
+		}
+		clientOptions.SetAuth(creds)
 	}
+
+	if cfg.TLS {
+		clientOptions.SetTLSConfig(&tls.Config{InsecureSkipVerify: true}) // TODO: This is insecure, should be made configurable
+	}
+
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		return fmt.Errorf("mongodb connection failed: %w", err)

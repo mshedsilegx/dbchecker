@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"net/url"
 
 	"criticalsys.net/dbchecker/config"
 	_ "github.com/sijms/go-ora/v2"
@@ -13,8 +14,14 @@ type Oracle struct {
 }
 
 func (o *Oracle) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
-	connectionString := fmt.Sprintf("%s/%s@%s:%d/%s", cfg.User, decryptedPassword, cfg.Host, cfg.Port, cfg.Name)
-	db, err := sql.Open("oracle", connectionString)
+	dsn := url.URL{
+		Scheme: "oracle",
+		User:   url.UserPassword(cfg.User, decryptedPassword),
+		Host:   fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		Path:   cfg.Name,
+	}
+
+	db, err := sql.Open("oracle", dsn.String())
 	if err != nil {
 		return err
 	}

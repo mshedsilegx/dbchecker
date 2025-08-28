@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"net/url"
 
 	"criticalsys.net/dbchecker/config"
 	_ "github.com/lib/pq"
@@ -13,12 +14,22 @@ type Postgres struct {
 }
 
 func (p *Postgres) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
-	tlsConfig := "sslmode=disable"
-	if cfg.TLS {
-		tlsConfig = "sslmode=require"
+	dsn := url.URL{
+		Scheme: "postgres",
+		User:   url.UserPassword(cfg.User, decryptedPassword),
+		Host:   fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		Path:   cfg.Name,
 	}
-	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?%s", cfg.User, decryptedPassword, cfg.Host, cfg.Port, cfg.Name, tlsConfig)
-	db, err := sql.Open("postgres", connectionString)
+
+	query := dsn.Query()
+	if cfg.TLS {
+		query.Set("sslmode", "require")
+	} else {
+		query.Set("sslmode", "disable")
+	}
+	dsn.RawQuery = query.Encode()
+
+	db, err := sql.Open("postgres", dsn.String())
 	if err != nil {
 		return err
 	}
