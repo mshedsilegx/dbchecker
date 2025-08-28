@@ -8,7 +8,9 @@ import (
 	_ "github.com/sijms/go-ora/v2"
 )
 
-type Oracle struct{}
+type Oracle struct {
+	SQLBase
+}
 
 func (o *Oracle) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
 	connectionString := fmt.Sprintf("%s/%s@%s:%d/%s", cfg.User, decryptedPassword, cfg.Host, cfg.Port, cfg.Name)
@@ -16,18 +18,6 @@ func (o *Oracle) Connect(cfg config.DatabaseConfig, decryptedPassword string) er
 	if err != nil {
 		return err
 	}
-	defer db.Close()
-
-	if err := db.Ping(); err != nil {
-		return err
-	}
-
-	if cfg.HealthQuery != "" {
-		_, err := db.Exec(cfg.HealthQuery)
-		if err != nil {
-			return fmt.Errorf("health check query failed: %w", err)
-		}
-	}
-
+	o.db = db
 	return nil
 }
