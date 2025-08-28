@@ -9,7 +9,7 @@ import (
 )
 
 type SQLServer struct {
-	SQLBase
+	db *sql.DB
 }
 
 func (s *SQLServer) Connect(cfg config.DatabaseConfig, decryptedPassword string) error {
@@ -20,4 +20,8 @@ func (s *SQLServer) Connect(cfg config.DatabaseConfig, decryptedPassword string)
 	}
 	s.db = db
 	return nil
+}
+
+func (s *SQLServer) Close() error {
+	return s.db.Close()
 }

@@ -19,3 +19,7 @@ func (s *SQLite) Connect(cfg config.DatabaseConfig, decryptedPassword string) er
 	s.db = db
 	return nil
 }
+
+func (s *SQLite) Close() error {
+	return s.db.Close()
+}

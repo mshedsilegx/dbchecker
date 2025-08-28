@@ -21,3 +21,7 @@ func (o *Oracle) Connect(cfg config.DatabaseConfig, decryptedPassword string) er
 	o.db = db
 	return nil
 }
+
+func (o *Oracle) Close() error {
+	return o.db.Close()
+}

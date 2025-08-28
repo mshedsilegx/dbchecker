@@ -25,3 +25,7 @@ func (p *Postgres) Connect(cfg config.DatabaseConfig, decryptedPassword string) 
 	p.db = db
 	return nil
 }
+
+func (p *Postgres) Close() error {
+	return p.db.Close()
+}

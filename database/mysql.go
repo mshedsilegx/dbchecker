@@ -25,3 +25,7 @@ func (m *MySQL) Connect(cfg config.DatabaseConfig, decryptedPassword string) err
 	m.db = db
 	return nil
 }
+
+func (m *MySQL) Close() error {
+	return m.db.Close()
+}
