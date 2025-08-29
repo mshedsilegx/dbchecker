@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"criticalsys.net/dbchecker/config"
 	"github.com/go-sql-driver/mysql"
@@ -36,8 +37,8 @@ func (m *MySQL) Connect(ctx context.Context, cfg config.DatabaseConfig, decrypte
 		// RegisterTLSConfig is not thread-safe, but in our concurrent model,
 		// each goroutine works on a different db config. If multiple configs
 		// point to the same server, this could be an issue, but it's a rare edge case.
-		// The check for ErrTLSConfigAlreadyRegistered mitigates races.
-		if err := mysql.RegisterTLSConfig(tlsKey, tlsConfig); err != nil && err != mysql.ErrTLSConfigAlreadyRegistered {
+		// The check for the error message mitigates races.
+		if err := mysql.RegisterTLSConfig(tlsKey, tlsConfig); err != nil && !strings.Contains(err.Error(), "already registered") {
 			return fmt.Errorf("could not register mysql tls config: %w", err)
 		}
 		mysqlConfig.TLSConfig = tlsKey
