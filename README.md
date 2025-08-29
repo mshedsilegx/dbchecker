@@ -34,7 +34,11 @@ databases:
     user: "string"
     password: "string"
     name: "string"
-    tls: bool
+    tls_mode: "string"
+    wallet_path: "string"
+    root_cert_path: "string"
+    client_cert_path: "string"
+    client_key_path: "string"
     health_query: "string"
 ```
 
@@ -45,7 +49,15 @@ databases:
 - `user`: The username for authentication.
 - `password`: The **encrypted** password for the user. See the security section for instructions on how to encrypt passwords.
 - `name`: The name of the database or schema to connect to. For SQLite, this is the path to the database file.
-- `tls`: A boolean (`true` or `false`) to enable or disable TLS/SSL for the connection.
+- `tls_mode`: (Optional) Specifies the TLS/SSL security mode. If omitted, defaults to `disable`.
+  - `disable`: Do not use TLS.
+  - `require`: Use TLS, but do not verify the server's certificate. **Warning: This is vulnerable to Man-in-the-Middle (MITM) attacks.**
+  - `verify-ca`: Use TLS and verify the server's certificate against the system's trusted Certificate Authorities (CAs). **(Recommended)**
+  - `verify-full`: Use TLS, verify the server's certificate against the system's trusted CAs, and also verify that the server's hostname matches the certificate. **(Most Secure)**
+- `wallet_path`: (Optional, Oracle only) The path to the directory containing the Oracle Wallet, required for `verify-ca` and `verify-full` modes with Oracle.
+- `root_cert_path`: (Optional) Path to a custom root CA certificate file (PEM format). If provided, it will be used to verify the server's certificate instead of the system's default trust store.
+- `client_cert_path`: (Optional) Path to a client certificate file (PEM format) for mutual TLS (mTLS) authentication. Requires `client_key_path`.
+- `client_key_path`: (Optional) Path to a client private key file (PEM format) for mTLS. Requires `client_cert_path`.
 - `health_query`: (Optional) A simple SQL query to execute to verify the connection is healthy (e.g., `"SELECT 1"`). This is not used for MongoDB.
 
 ## Examples
@@ -59,12 +71,12 @@ To check a PostgreSQL database, add an entry like this to your `config.yaml`:
 databases:
   my_postgres_db:
     type: "postgres"
-    host: "localhost"
+    host: "db.example.com"
     port: 5432
     user: "pguser"
     password: "ENCRYPTED_PASSWORD_HERE" # Replace with your encrypted password
     name: "mydatabase"
-    tls: false
+    tls_mode: "verify-full" # Use the most secure TLS mode
     health_query: "SELECT 1"
 ```
 Run the check for this specific database:
@@ -86,12 +98,12 @@ To check a MongoDB database, add an entry like this:
 databases:
   my_mongo_db:
     type: "mongodb"
-    host: "localhost"
+    host: "db.example.com"
     port: 27017
     user: "mongouser"
     password: "ENCRYPTED_PASSWORD_HERE" # Replace with your encrypted password
     name: "admin"
-    tls: false
+    tls_mode: "verify-full"
 ```
 
 Run the check for this specific database:
@@ -107,21 +119,23 @@ export DB_SECRET_KEY="your-32-byte-secret-key"
 
 ## Security and Credential Encryption
 
-To avoid storing plaintext passwords in the configuration file, the application uses AES-GCM encryption to secure your credentials.
-Providing the Secret Key
+To avoid storing plaintext passwords in the configuration file, the application uses AES-GCM encryption. The security of your passwords depends entirely on the secrecy of your secret key.
 
 ### How it Works
 
-1.  **Secret Key**: The application uses a secret key for encryption and decryption. This key is provided at runtime via the `DB_SECRET_KEY` environment variable. **This key must be 32 bytes (256 bits) long.**
-2.  **Encryption**: You use the `-encrypt` flag to encrypt your database password. The application uses the `DB_SECRET_KEY` to perform the encryption and gives you a base64-encoded string.
-3.  **Configuration**: You paste this encrypted string into the `password` field in your `config.yaml`.
-4.  **Decryption**: When the application runs, it reads the encrypted password from the config, reads the `DB_SECRET_KEY` from the environment, and decrypts the password in memory just before connecting to the database.
+1.  **Generate a Secret Key**: You provide a secure, 32-byte (256-bit) secret key to the application.
+2.  **Encrypt Passwords**: You use the `-encrypt` flag along with your secret key to encrypt a plaintext password.
+3.  **Configure**: You store the resulting encrypted password in the `config.yaml` file.
+4.  **Decrypt at Runtime**: When the application runs, it uses the same secret key to decrypt the password in memory just before establishing a database connection.
 
-You can provide the secret key to the application in one of two ways.
-* the `DB_SECRET_KEY` environment variable, passed through a XOR de-obfuscation step with a key compiled into the application.
-  Key File (Recommended): You can store the key in a file and provide the path to it using the -key-file flag. This is the recommended approach for production environments.
+### Providing the Secret Key
 
-* The -key-file flag always takes precedence over the DB_SECRET_KEY environment variable if both are present.
+You can provide the secret key to the application in one of two ways:
+
+*   **Key File (Recommended)**: You can store the key in a file and provide the path to it using the `-key-file` flag. This is the recommended approach for production environments as it helps avoid exposing keys in shell history or process lists.
+*   **Environment Variable**: You can provide the key via the `DB_SECRET_KEY` environment variable.
+
+The `-key-file` flag always takes precedence over the `DB_SECRET_KEY` environment variable if both are present.
 
 
 ### How to Encrypt Your Credentials
