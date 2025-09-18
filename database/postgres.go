@@ -23,7 +23,7 @@ func (p *Postgres) Connect(ctx context.Context, cfg config.DatabaseConfig, decry
 	}
 
 	query := dsn.Query()
-	sslMode := "disable" // Default to disable
+	var sslMode string
 	switch cfg.TLSMode {
 	case "require":
 		sslMode = "require"
