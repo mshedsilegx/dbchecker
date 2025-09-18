@@ -8,13 +8,13 @@ import (
 )
 
 type DatabaseConfig struct {
-	Type        string `yaml:"type"`
-	Host        string `yaml:"host"`
-	Port        int    `yaml:"port"`
-	User        string `yaml:"user"`
-	Password    string `yaml:"password"`
-	Name        string `yaml:"name"`
-	HealthQuery string `yaml:"health_query"`
+	Type           string `yaml:"type"`
+	Host           string `yaml:"host"`
+	Port           int    `yaml:"port"`
+	User           string `yaml:"user"`
+	Password       string `yaml:"password"`
+	Name           string `yaml:"name"`
+	HealthQuery    string `yaml:"health_query"`
 	TLSMode        string `yaml:"tls_mode,omitempty"`
 	WalletPath     string `yaml:"wallet_path,omitempty"`
 	RootCertPath   string `yaml:"root_cert_path,omitempty"`
