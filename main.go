@@ -115,7 +115,11 @@ func checkDatabase(ctx context.Context, dbConfig config.DatabaseConfig, dbID str
 	if err := db.Connect(ctx, dbConfig, string(decryptedPassword)); err != nil {
 		return fmt.Errorf("connection failed for %s: %w", dbID, err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			fmt.Printf("Error closing database connection for %s: %v\n", dbID, err)
+		}
+	}()
 
 	if err := db.Ping(ctx); err != nil {
 		return fmt.Errorf("ping failed for %s: %w", dbID, err)
