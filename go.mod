@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.11.1
 	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/microsoft/go-mssqldb v1.9.6
 	github.com/sijms/go-ora/v2 v2.9.0
