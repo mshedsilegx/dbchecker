@@ -1,3 +1,6 @@
+/*
+Package crypto provides AES-GCM encryption and decryption utilities for sensitive data like passwords.
+*/
 package crypto
 
 import (
@@ -7,8 +10,9 @@ import (
 	"io"
 )
 
-func Encrypt(data, key []byte) ([]byte, error) {
-	block, err := aes.NewCipher(key)
+// Encrypt takes a plaintext and a secret key, returning the AES-GCM encrypted ciphertext.
+func Encrypt(plaintext []byte, secretKey []byte) ([]byte, error) {
+	block, err := aes.NewCipher(secretKey)
 	if err != nil {
 		return nil, err
 	}
@@ -20,12 +24,13 @@ func Encrypt(data, key []byte) ([]byte, error) {
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		return nil, err
 	}
-	ciphertext := gcm.Seal(nonce, nonce, data, nil)
+	ciphertext := gcm.Seal(nonce, nonce, plaintext, nil)
 	return ciphertext, nil
 }
 
-func Decrypt(data, key []byte) ([]byte, error) {
-	block, err := aes.NewCipher(key)
+// Decrypt takes a ciphertext and a secret key, returning the decrypted plaintext.
+func Decrypt(ciphertext []byte, secretKey []byte) ([]byte, error) {
+	block, err := aes.NewCipher(secretKey)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +39,7 @@ func Decrypt(data, key []byte) ([]byte, error) {
 		return nil, err
 	}
 	nonceSize := gcm.NonceSize()
-	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
+	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		return nil, err

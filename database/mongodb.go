@@ -5,19 +5,22 @@ import (
 	"fmt"
 
 	"criticalsys.net/dbchecker/config"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
+// MongoDB implements the DB interface for MongoDB using the v2 driver.
 type MongoDB struct {
 	client   *mongo.Client
 	database string
 }
 
+// Connect establishes a connection to MongoDB using the provided configuration.
+// It uses the v2 driver pattern where mongo.Connect takes only options.
 func (m *MongoDB) Connect(ctx context.Context, cfg config.DatabaseConfig, decryptedPassword string) error {
-	clientOptions := options.Client()
-	clientOptions.SetHosts([]string{fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)})
+	uri := fmt.Sprintf("mongodb://%s:%d", cfg.Host, cfg.Port)
+	clientOptions := options.Client().ApplyURI(uri)
 
 	if cfg.User != "" {
 		creds := options.Credential{
@@ -35,7 +38,7 @@ func (m *MongoDB) Connect(ctx context.Context, cfg config.DatabaseConfig, decryp
 		clientOptions.SetTLSConfig(tlsConfig)
 	}
 
-	client, err := mongo.Connect(ctx, clientOptions)
+	client, err := mongo.Connect(clientOptions)
 	if err != nil {
 		return fmt.Errorf("mongodb connection failed: %w", err)
 	}
@@ -51,7 +54,7 @@ func (m *MongoDB) Ping(ctx context.Context) error {
 // HealthCheck for MongoDB lists collection names as a basic check. The query parameter is ignored.
 func (m *MongoDB) HealthCheck(ctx context.Context, query string) error {
 	db := m.client.Database(m.database)
-	_, err := db.ListCollectionNames(ctx, primitive.M{})
+	_, err := db.ListCollectionNames(ctx, bson.D{})
 	if err != nil {
 		return fmt.Errorf("mongodb list collections failed: %w", err)
 	}

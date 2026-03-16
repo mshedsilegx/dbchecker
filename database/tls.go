@@ -5,9 +5,11 @@ import (
 	"crypto/x509"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 // buildTLSConfig creates a tls.Config based on the requested mode and certificate paths.
+// It uses os.OpenRoot (Go 1.24+) to securely load CA certificates from disk.
 func buildTLSConfig(tlsMode, serverName, rootCertPath, clientCertPath, clientKeyPath string) (*tls.Config, error) {
 	if tlsMode == "disable" || tlsMode == "" {
 		return nil, nil
@@ -28,7 +30,15 @@ func buildTLSConfig(tlsMode, serverName, rootCertPath, clientCertPath, clientKey
 
 	// Load custom root CA if provided, otherwise use system's trust store.
 	if rootCertPath != "" {
-		caCert, err := os.ReadFile(rootCertPath)
+		root, err := os.OpenRoot(filepath.Dir(rootCertPath))
+		if err != nil {
+			return nil, fmt.Errorf("failed to open root directory: %w", err)
+		}
+		defer func() {
+			_ = root.Close()
+		}()
+
+		caCert, err := root.ReadFile(filepath.Base(rootCertPath))
 		if err != nil {
 			return nil, fmt.Errorf("failed to read root certificate: %w", err)
 		}

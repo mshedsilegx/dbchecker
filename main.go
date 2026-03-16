@@ -1,3 +1,8 @@
+/*
+Package main provides a database connectivity and health check utility.
+It supports multiple database types (MySQL, PostgreSQL, Oracle, SQL Server, SQLite, MongoDB),
+handles encrypted credentials, and performs health checks using custom queries.
+*/
 package main
 
 import (
@@ -16,6 +21,8 @@ import (
 
 var version string
 
+// main is the entry point of the application. It handles command-line flags,
+// secret key retrieval, password encryption, and initiates database checks.
 func main() {
 	configFile := flag.String("config", "config.yaml", "Path to the configuration file")
 	dbID := flag.String("db", "", "Identifier of the database to check")
@@ -101,6 +108,12 @@ func main() {
 	}
 }
 
+// checkDatabase performs the full lifecycle of a database check:
+// 1. Decrypts the password
+// 2. Initializes the database driver
+// 3. Establishes a connection
+// 4. Pings the database
+// 5. Runs a health check query if provided
 func checkDatabase(ctx context.Context, dbConfig config.DatabaseConfig, dbID string, secretKey []byte) error {
 	decryptedPassword, err := crypto.Decrypt([]byte(dbConfig.Password), secretKey)
 	if err != nil {

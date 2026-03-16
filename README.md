@@ -6,8 +6,16 @@ DB Connection Diags is a command-line utility designed to help developers and sy
 
 The primary objectives of this tool are:
 - To provide a simple, configuration-driven way to check database health.
-- To support a wide range of popular databases (SQL and NoSQL).
-- To provide a secure way to handle database credentials by using encryption.
+- To support a wide range of popular databases (SQL and NoSQL), including modern drivers like **MongoDB v2**.
+- To provide a secure way to handle database credentials by using AES-GCM encryption.
+- To implement modern security best practices, such as **scoped file access (os.Root)** introduced in **Go 1.24**.
+
+For more technical details on the system's structure and design decisions, please refer to [ARCHITECTURE.md](./ARCHITECTURE.md) and [DESIGN.md](./DESIGN.md).
+
+## Requirements
+
+- **Go 1.24** or higher (required for `os.Root` support).
+- Database drivers (automatically handled by `go mod tidy`).
 
 ## Command-Line Arguments
 
